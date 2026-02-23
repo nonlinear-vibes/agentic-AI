@@ -1,8 +1,10 @@
 import os
 from dotenv import load_dotenv
 from google import genai
-import argparse
 from google.genai import types
+
+from call_function import available_functions, call_function
+from prompts import system_prompt
 
 
 
@@ -15,20 +17,41 @@ def main():
     client = genai.Client(api_key=api_key)
 
     user_input = input("User input: ")
-    messages = [f"user: {user_input}"]
+    messages   = [f"user: {user_input}"]
     print('')
     
     while user_input != 'X':
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=messages,
-            )
-        print(f"AI response: {response.text}")
-        print('')
-        messages.append(f"agent: {response.text}")
+            config=types.GenerateContentConfig(
+                tools=[available_functions], system_instruction=system_prompt
+            ),
+        )
+        
+    
+        if response.text is not None:
+            print(f"AI response: {response.text}")
+            print('')
+            messages.append(f"agent: {response.text}")
+
+        if response.function_calls:
+            for function_call in response.function_calls:
+                print(f"- Calling function: {function_call.name}({function_call.args})")
+                function_result = call_function(function_call)
+                if len(function_result) == 0:
+                    raise RuntimeError(f"Empty function response for {function_call.name}")
+                
+                messages.append(f"Function called: {function_call.name}({function_call.args})")
+                messages.append(f"Function result: {function_result}")
+                print(f"- Function result: {function_result}")
+                print('')
+
         user_input = input("User input: ")
         print('')
         messages.append(f"user: {user_input}")
+
+    print(messages)
 
 
 if __name__ == "__main__":
