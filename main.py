@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 
 from call_function import available_functions, call_function
+from config import MAX_ITERS
 from prompts import system_prompt
 
 
@@ -29,13 +30,8 @@ def main():
             ),
         )
         
-    
-        if response.text is not None:
-            print(f"AI response: {response.text}")
-            print('')
-            messages.append(f"agent: {response.text}")
-
-        if response.function_calls:
+        counter = 0
+        while response.function_calls and counter < MAX_ITERS:
             for function_call in response.function_calls:
                 print(f"- Calling function: {function_call.name}({function_call.args})")
                 function_result = call_function(function_call)
@@ -46,6 +42,22 @@ def main():
                 messages.append(f"Function result: {function_result}")
                 print(f"- Function result: {function_result}")
                 print('')
+
+            response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=messages,
+            config=types.GenerateContentConfig(
+                tools=[available_functions], system_instruction=system_prompt
+                ),
+            )
+            counter += 1
+    
+        if response.text is not None:
+            print(f"AI response: {response.text}")
+            print('')
+            messages.append(f"agent: {response.text}")
+
+        
 
         user_input = input("User input: ")
         print('')
