@@ -40,13 +40,21 @@ def get_file_content(working_directory, file_path, line_start=1, line_end=None):
 
 schema_get_file_content = types.FunctionDeclaration(
     name="get_file_content",
-    description=f"Retrieves the content (at most {MAX_CHARS} characters) of a specified file within the working directory",
+    description=f"Retrieves a specific line range (with a maximum of {MAX_CHARS} characters) from a file within the working directory.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="Path to the file to read, relative to the working directory",
+                description="Path to the file relative to working directory",
+            ),
+            "line_start": types.Schema(
+                type=types.Type.INTEGER,
+                description="The first line to read (1-indexed). Defaults to 1.",
+            ),
+            "line_end": types.Schema(
+                type=types.Type.INTEGER,
+                description="The last line to read (inclusive). Defaults to the end of the file.",
             ),
         },
         required=["file_path"],

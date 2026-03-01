@@ -7,7 +7,6 @@ from google.genai import types
 from call_function import available_functions, call_function
 from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS, log_event
 from prompts import system_prompt
-import json
 
 
 def main():
