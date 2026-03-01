@@ -1,12 +1,13 @@
+from datetime import datetime
 import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
 from call_function import available_functions, call_function
-from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS
+from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS, log_event
 from prompts import system_prompt
-import logging
+import json
 
 
 def main():
@@ -17,21 +18,12 @@ def main():
 
     client = genai.Client(api_key=api_key)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler("session_history.txt"),
-            # logging.StreamHandler() # Still prints to console
-        ]
-    )
-
     messages = []
     
     while True:
         user_input = input("User input: ")
         messages.append(types.Content(role="user", parts=[types.Part(text=user_input)]))
-        logging.info(f"User input: {user_input}")
+        log_event("user_input", {"text":user_input})
         print('')
         if user_input == 'X':
             print("Exiting.")
@@ -64,7 +56,7 @@ def generate_response(client, messages):
 
             for part in model_content.parts:
                 if part.thought:
-                    logging.info(f"MODEL THOUGHT: {part.text}")
+                    log_event("model_thought", {"text": part.text})
 
             if not KEEP_THOUGHTS:
                 cleaned_parts = [p for p in model_content.parts if not p.thought]
@@ -74,13 +66,13 @@ def generate_response(client, messages):
 
             if response.function_calls:
                 for function_call in response.function_calls:
-                    logging.info(f"- Calling function: {function_call.name}({function_call.args})")
+                    log_event("function_call", {"name": function_call.name, "args": function_call.args})
 
                     if VERBOSE:
                         print(f"- Calling function: {function_call.name}({function_call.args})")
 
                     result = call_function(function_call)
-                    logging.info(f"->: {result}")
+                    log_event("function_result", {"result": result})
                     
                     if VERBOSE:
                         print(f"-> {result}")
@@ -96,9 +88,9 @@ def generate_response(client, messages):
 
             text_parts = [p.text for p in model_content.parts if p.text and not p.thought]
             final_text = "".join(text_parts)
-            logging.info(f"Final response: {final_text}")
+            log_event("final_response", {"text": final_text})
             return final_text
-            
+        
 
 if __name__ == "__main__":
     main()

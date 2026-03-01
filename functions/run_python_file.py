@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 from google.genai import types
 
@@ -17,7 +18,7 @@ def run_python_file(working_directory, file_path, args=None):
             return f'Error: "{file_path}" is not a Python file'
 
         # build the command to run the Python file
-        command = ["python", abs_file_path]
+        command = [sys.executable, abs_file_path]
         if args:
             command.extend(args)
 

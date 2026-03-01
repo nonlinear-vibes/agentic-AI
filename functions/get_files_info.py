@@ -14,6 +14,8 @@ def get_files_info(working_directory, directory="."):
         # go through files and get info
         files_info = []
         for filename in os.listdir(target_dir):
+            if filename.startswith('.') or filename == '__pycache__':
+                continue
             filepath = os.path.join(target_dir, filename)
             is_dir = os.path.isdir(filepath)
             file_size = os.path.getsize(filepath)

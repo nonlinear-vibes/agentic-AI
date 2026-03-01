@@ -26,17 +26,16 @@ function_map = {
 def call_function(function_call):
     function_name = function_call.name or ""
     if function_name not in function_map:
-        return types.Content(
-            role="tool",
-            parts=[types.Part.from_function_response(
-                name = function_name,
-                response={"error": f"Unknown function: {function_name}"},
-                 )],
-        )
+        return {"error": f"Unknown function: {function_name}"}
     
-    args = dict(function_call.args) if function_call.args else {}
-    args["working_directory"] = WORKING_DIR
-    function_result = function_map[function_name](**args)
+    args = {}
+    if function_call.args:
+        args = {k: v for k, v in function_call.args.items()}
 
-    return function_result
-    
+    args["working_directory"] = WORKING_DIR
+
+    try:
+        function_result = function_map[function_name](**args)
+        return function_result
+    except Exception as e:
+        return {"error": str(e)}

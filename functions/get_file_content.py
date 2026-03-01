@@ -1,11 +1,9 @@
 import os
-
 from google.genai import types
-
 from config import MAX_CHARS
 
 
-def get_file_content(working_directory, file_path):
+def get_file_content(working_directory, file_path, line_start=1, line_end=None):
     try:
         # guardrail
         abs_working_dir = os.path.abspath(working_directory)
@@ -15,14 +13,27 @@ def get_file_content(working_directory, file_path):
         if not os.path.isfile(abs_file_path):
             return f'Error: File not found or is not a regular file: "{file_path}"'
         
-        # read file content with size limit
-        with open(abs_file_path, "r") as f:
-            content = f.read(MAX_CHARS)
-            if f.read(1):
-                content += (
-                    f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
-                )
-        return content
+        # read all lines
+        with open(abs_file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        total_lines = len(lines)
+        
+        start_idx = max(0, line_start - 1)
+        end_idx = total_lines if line_end is None else min(total_lines, line_end)
+
+        if start_idx >= total_lines:
+            return f"Error: line_start ({line_start}) exceeds total lines ({total_lines})"
+        
+        selected_lines = lines[start_idx:end_idx]
+        content = "".join(selected_lines)
+
+        if len(content) > MAX_CHARS:
+            content = content[:MAX_CHARS] + f"\n[...Content truncated at {MAX_CHARS} characters]"
+
+        header = f"--- File: {file_path} (Lines {start_idx + 1} to {end_idx} of {total_lines}) ---\n"
+        return header + content
+
     except Exception as e:
         return f'Error reading file "{file_path}": {e}'
 
