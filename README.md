@@ -1,8 +1,7 @@
-# Gemini-based coding agent in Python
+# Agentic AI
 
-A lightweight, robust, and highly transparent Python-based agentic loop powered by Gemini 2.5 Flash.
-
-## 🚀 Key Features
+A general-purpose Python coding agent with the ability to read, write and run files.
+### Key Features:
 - Native "Thinking" Integration: Utilizes Gemini 2.5's internal reasoning chain (Chain-of-Thought) to simulate and verify plans before execution.
 
 - Stateful Memory: Maintains a clean conversation history with automated "thought pruning" to optimize token usage.
@@ -13,8 +12,39 @@ A lightweight, robust, and highly transparent Python-based agentic loop powered 
 
 - Surgical File Access: Advanced file-reading tools allow the agent to read specific line ranges, enabling it to handle large codebases efficiently.
 
-## 🛠️ Project structure
+## 🚀 Quick start
+### 1. Clone the repository
+`git clone github.com/nonlinear-vibes/agentic-AI
+cd agentic-AI`
+### 2. Set up your environment
+Create a `.env` file in the root directory and add your Gemini API key:
 
+`echo "GEMINI_API_KEY=your_key_here" > .env`
+
+### 3. Install dependencies
+
+`pip install -r requirements.txt`
+
+### 4. Run the Agent
+
+`python main.py`
+
+
+## 🛠️ Project structure
+.
+├─ functions
+│  ├─ get_file_content.py
+│  ├─ get_files_info.py
+|  ├─ run_python_file.py
+|  └─ write_file.py
+├─ logs
+|  └─ [saved session logs]
+├─ workspace
+|  └─ [your project folder]
+├─ call_function.py
+├─ config.py
+├─ main.py
+└─ prompts.py
 
 ## ⚙️ Configuration
 The agent's behavior can be toggled in `config.py`:
@@ -26,7 +56,7 @@ The agent's behavior can be toggled in `config.py`:
 - `KEEP_THOUGHTS` - Keeps the agent's internal thought process in the session history, enabling better chain of thought context on the expense of higher token traffic.
 - `THINKING_TOKEN_LIMIT` - How many tokens can be used for thinking in a single round of messages.
 
-## 🔧 Available agentic functions
+## 🔧 Agentic functions
 The agent currently has the following capabilities out of the box:
 
 - File Exploration: List files and directories with metadata.
@@ -36,4 +66,5 @@ The agent currently has the following capabilities out of the box:
 - File Writing: Create or overwrite files with automatic directory creation.
 
 - Code Execution: Run Python scripts and capture STDOUT/STDERR/Tracebacks for self-debugging.
+
 
