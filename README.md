@@ -1,16 +1,8 @@
 # Agentic AI
 
-A general-purpose Python coding agent with the ability to read, write and run files.
-### Key Features:
-- Native "Thinking" Integration: Utilizes Gemini 2.5's internal reasoning chain (Chain-of-Thought) to simulate and verify plans before execution.
+General-purpose Python coding agent with the ability to read, write and run files. Utilizes and maintains internal reasoning (chain of thought) across messages, but it can be also turned off to spare tokens on easier tasks. Session logs are automatically saved in a list of JSON objects, capturing every thought, tool call, and result.
 
-- Stateful Memory: Maintains a clean conversation history with automated "thought pruning" to optimize token usage.
-
-- Safety Guardrails: Implements path-traversal protection and subprocess timeouts to ensure the agent remains within the permitted workspace.
-
-- JSONL Session Logging: Automatically generates unique, machine-readable logs for every session, capturing every thought, tool call, and result.
-
-- Surgical File Access: Advanced file-reading tools allow the agent to read specific line ranges, enabling it to handle large codebases efficiently.
+Warning: Although there are path-traversal protection and subprocess timeouts in place to ensure the agent remains within the permitted workspace, apart from that, the agent can do anything on your machine.
 
 ## 🚀 Quick start
 ### 1. Clone the repository
@@ -46,6 +38,8 @@ Create a `.env` file in the root directory and add your Gemini API key:
 ├─ main.py
 └─ prompts.py
 
+Upon a user reuest, the agent can decide either to generate a response or call for function execution. Each funtion execution's result is returned to the agent and it can decide again which action to take, and so on in a loop. Once it decides to respond with a text, the user can prompt it again.
+
 ## ⚙️ Configuration
 The agent's behavior can be toggled in `config.py`:
 - `MAX_CHARS` - Maximum number of characters that can be read from a file in a single read function call.
@@ -61,10 +55,11 @@ The agent currently has the following capabilities out of the box:
 
 - File Exploration: List files and directories with metadata.
 
-- Surgical Read: Read specific line ranges of files.
+- Surgical Read: Read specific line ranges of files. Surgical File Access: Advanced file-reading tools allow the agent to read specific line ranges, enabling it to handle large codebases efficiently.
 
 - File Writing: Create or overwrite files with automatic directory creation.
 
 - Code Execution: Run Python scripts and capture STDOUT/STDERR/Tracebacks for self-debugging.
+
 
 
