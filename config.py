@@ -11,6 +11,8 @@ THINKING = True
 KEEP_THOUGHTS = True
 THINKING_TOKEN_LIMIT = 512
 
+# --- Model Configuration ---
+MODEL_ID = "gemini-2.5-flash"
 
 
 # --- Session & Logging Setup ---
