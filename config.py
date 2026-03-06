@@ -4,7 +4,7 @@ from datetime import datetime
 
 # --- Constants & Settings ---
 MAX_CHARS = 10000
-WORKING_DIR = "./calculator"
+WORKING_DIR = "./workspace/project" # rename project to your project folder
 MAX_ITERS = 20
 VERBOSE = False
 THINKING = True

@@ -1,17 +1,16 @@
-from datetime import datetime
 import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
 from call_function import available_functions, call_function
-from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS, log_event
-from prompts import system_prompt
+from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS, MODEL_ID, log_event
+from prompts import SYSTEM_PROMPT
 
 
 def main():
     load_dotenv()
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("API_KEY")
     if api_key is None:
         raise RuntimeError("API key not found.")
 
@@ -40,11 +39,11 @@ def main():
 def generate_response(client, messages):
         for _ in range(MAX_ITERS):
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model=MODEL_ID,
                 contents=messages,
                 config=types.GenerateContentConfig(
                     tools=[available_functions],
-                    system_instruction=system_prompt,
+                    system_instruction=SYSTEM_PROMPT,
                     thinking_config=types.ThinkingConfig(
                         include_thoughts=THINKING,
                         thinking_budget=THINKING_TOKEN_LIMIT),

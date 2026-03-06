@@ -1,17 +1,9 @@
-# Python-generated files
 __pycache__/
-*.py[oc]
+*.pyc
+.venv/
+.env
+.pytest_cache/
+.mypy_cache/
 build/
 dist/
-wheels/
-*.egg-info
-uv.lock
-pyproject.toml
-.python-version
-
-# Virtual environments
-.venv
-.env
-
-LICENSE
-README.md
+*.egg-info/
