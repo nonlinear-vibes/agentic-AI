@@ -55,7 +55,7 @@ python main.py
 └─ prompts.py
 ```
 
-Upon a user request, the agent can decide either to generate a response or call for function execution. Each funtion execution's result is returned to the agent and it can decide again which action to take, and so on in a loop. Once it decides to respond with a text, the user can prompt it again.
+Upon a user request, the agent can decide either to generate a response or call for function execution. Each function execution's result is returned to the agent and it can decide again which action to take, and so on in a loop. Once it decides to respond with a text, the user can prompt it again.
 
 ## ⚙️ Configuration
 The agent's behavior can be toggled in `config.py`:
@@ -77,6 +77,7 @@ The agent can call the following functions:
 - `write_file(file_path, content)` - Create or overwrite files with automatic directory creation.
 
 - `run_python_file(file_path, args)` - Run Python scripts and capture STDOUT/STDERR/Tracebacks for self-debugging.
+
 
 
 
