@@ -9,11 +9,13 @@ Warning: Although there are path-traversal protection and subprocess timeouts in
 ### 1. Prerequisites
 
 - Python 3.10+
-- An API key: you can get one at [Google AI Studio](aistudio.google.com) (For now, only Gemini is supported.)
-
+- An API key from [Google AI Studio](aistudio.google.com) (For now, only Gemini is supported.)
+- Optional: [uv](https://docs.astral.sh/uv/) package manager, install with:
+  - Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+  - Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 ### 2. Clone the repository
 ```
-git clone github.com/nonlinear-vibes/agentic-AI
+git clone https://github.com/nonlinear-vibes/agentic-AI
 cd agentic-AI
 ```
 
@@ -25,13 +27,21 @@ echo "API_KEY=your_key_here" > .env
 ```
 
 ### 4. Install dependencies
-
+If you have `uv` installed:
+```
+uv sync
+```
+If not:
 ```
 pip install -r requirements.txt
 ```
 
 ### 5. Run the Agent
-
+If you have `uv` installed:
+```
+uv run main.py
+```
+If not:
 ```
 python main.py
 ```
