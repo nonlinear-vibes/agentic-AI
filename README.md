@@ -47,7 +47,7 @@ python main.py
 ```
 
 
-## 🛠️ Project structure
+## ⚙ Project structure
 ```
 .  
 ├─ functions
@@ -67,7 +67,7 @@ python main.py
 
 Upon a user request, the agent can decide either to generate a response or call for function execution. Each function execution's result is returned to the agent and it can decide again which action to take, and so on in a loop. Once it decides to respond with a text, the user can prompt it again.
 
-## ⚙️ Configuration
+## 🛠️ Configuration
 The agent's behavior can be toggled in `config.py`:
 - `MAX_CHARS` - Maximum number of characters that can be read from a file in a single read function call.
 - `WORKING_DIR` - Name of your working directory. Strict path verification ensures that the agent cannot operate outside of this directory.
