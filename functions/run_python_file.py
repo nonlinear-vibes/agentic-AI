@@ -47,6 +47,28 @@ def run_python_file(working_directory, file_path, args=None):
         return f"Error: executing Python file: {e}"
 
 
+schema_run_python_file = {
+    "type": "function",
+    "function": {
+        "name": "run_python_file",
+        "description": "Executes a specified Python file within the working directory and returns its output",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "Path to the Python file to run, relative to the working directory"
+                },
+                "args": {
+                    "type": "array",
+                    "description": "Optional list of arguments to pass to the Python script"
+                }
+            },
+            "required": ["file_path"] 
+        }
+    }
+}
+
 schema_run_python_file = types.FunctionDeclaration(
     name="run_python_file",
     description="Executes a specified Python file within the working directory and returns its output",
@@ -57,13 +79,13 @@ schema_run_python_file = types.FunctionDeclaration(
                 type=types.Type.STRING,
                 description="Path to the Python file to run, relative to the working directory",
             ),
-            "args": types.Schema(
-                type=types.Type.ARRAY,
-                items=types.Schema(
-                    type=types.Type.STRING,
-                ),
-                description="Optional list of arguments to pass to the Python script",
-            ),
+            "args": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "Optional list of arguments to pass to the Python script",
+            },
         },
         required=["file_path"],
     ),

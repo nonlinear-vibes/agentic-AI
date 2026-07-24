@@ -38,25 +38,28 @@ def get_file_content(working_directory, file_path, line_start=1, line_end=None):
         return f'Error reading file "{file_path}": {e}'
 
 
-schema_get_file_content = types.FunctionDeclaration(
-    name="get_file_content",
-    description=f"Retrieves a specific line range (with a maximum of {MAX_CHARS} characters) from a file within the working directory.",
-    parameters=types.Schema(
-        type=types.Type.OBJECT,
-        properties={
-            "file_path": types.Schema(
-                type=types.Type.STRING,
-                description="Path to the file relative to working directory",
-            ),
-            "line_start": types.Schema(
-                type=types.Type.INTEGER,
-                description="The first line to read (1-indexed). Defaults to 1.",
-            ),
-            "line_end": types.Schema(
-                type=types.Type.INTEGER,
-                description="The last line to read (inclusive). Defaults to the end of the file.",
-            ),
-        },
-        required=["file_path"],
-    ),
-)
+schema_get_file_content = {
+    "type": "function",
+    "function": {
+        "name": "get_file_content",
+        "description": f"Retrieves a specific line range (with a maximum of {MAX_CHARS} characters) from a file within the working directory.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "Path to the file relative to working directory"
+                },
+                "line_start": {
+                    "type": "integer",
+                    "description": "The first line to read (1-indexed). Defaults to 1."
+                },
+                "line_end": {
+                    "type": "integer",
+                    "description": "The last line to read (inclusive). Defaults to the end of the file."
+                }
+            },
+            "required": ["file_path"] 
+        }
+    }
+}
