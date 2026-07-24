@@ -1,4 +1,4 @@
-from google.genai import types
+from openai import OpenAI
 
 from config import WORKING_DIR
 from functions.get_file_content import get_file_content, schema_get_file_content
@@ -6,14 +6,12 @@ from functions.get_files_info import get_files_info, schema_get_files_info
 from functions.run_python_file import run_python_file, schema_run_python_file
 from functions.write_file import schema_write_file, write_file
 
-available_functions = types.Tool(
-    function_declarations=[
+available_functions = function_declarations=[
         schema_get_files_info,
         schema_get_file_content,
         schema_run_python_file,
         schema_write_file,
     ]
-)
 
 # Map function names to actual implementations
 function_map = {
@@ -23,14 +21,13 @@ function_map = {
     "write_file": write_file,
 }
 
-def call_function(function_call):
-    function_name = function_call.name or ""
+def call_function(function_name, function_args):
     if function_name not in function_map:
         return {"error": f"Unknown function: {function_name}"}
     
     args = {}
-    if function_call.args:
-        args = {k: v for k, v in function_call.args.items()}
+    if function_args:
+        args = {k: v for k, v in function_args.items()}
 
     args["working_directory"] = WORKING_DIR
 

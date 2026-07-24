@@ -1,7 +1,7 @@
 import os
+import json
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from openai import OpenAI
 
 from call_function import available_functions, call_function
 from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS, MODEL_ID, log_event
@@ -14,18 +14,23 @@ def main():
     if api_key is None:
         raise RuntimeError("API key not found.")
 
-    client = genai.Client(api_key=api_key)
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+        )
 
-    messages = []
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     while True:
         user_input = input("User input: ")
-        messages.append(types.Content(role="user", parts=[types.Part(text=user_input)]))
-        log_event("user_input", {"text":user_input})
-        print('')
+        
         if user_input == 'X':
             print("Exiting.")
             break
+
+        messages.append({"role": "user", "content": user_input})
+        log_event("user_input", {"text": user_input})
+        print('')
 
         try:
             final_response = generate_response(client, messages)
@@ -38,56 +43,45 @@ def main():
 # agentic loop
 def generate_response(client, messages):
         for _ in range(MAX_ITERS):
-            response = client.models.generate_content(
+            response = client.chat.completions.create(
                 model=MODEL_ID,
-                contents=messages,
-                config=types.GenerateContentConfig(
-                    tools=[available_functions],
-                    system_instruction=SYSTEM_PROMPT,
-                    thinking_config=types.ThinkingConfig(
-                        include_thoughts=THINKING,
-                        thinking_budget=THINKING_TOKEN_LIMIT),
-                ),
+                messages=messages,
+                tools=available_functions,
             )
 
-            model_content = response.candidates[0].content
+            message = response.choices[0].message
+            messages.append(message.model_dump(exclude_none=True))
 
-            for part in model_content.parts:
-                if part.thought:
-                    log_event("model_thought", {"text": part.text})
-
-            if not KEEP_THOUGHTS:
-                cleaned_parts = [p for p in model_content.parts if not p.thought]
-                messages.append(types.Content(role="model", parts=cleaned_parts))
-            else:
-                messages.append(model_content)
-
-            if response.function_calls:
-                for function_call in response.function_calls:
-                    log_event("function_call", {"name": function_call.name, "args": function_call.args})
+            if message.tool_calls:
+                for tool_call in message.tool_calls:
+                    function_name = tool_call.function.name
+                    function_args = json.loads(tool_call.function.arguments)
+                    log_event("function_call", {"name": function_name, "args": function_args})
 
                     if VERBOSE:
-                        print(f"- Calling function: {function_call.name}({function_call.args})")
+                        print(f"- Calling function: {function_name}({function_args})")
 
-                    result = call_function(function_call)
+                    result = call_function(function_name, function_args)
                     log_event("function_result", {"result": result})
                     
                     if VERBOSE:
                         print(f"-> {result}")
 
-                    messages.append(types.Content(
-                        role="tool",
-                        parts=[types.Part.from_function_response(
-                            name=function_call.name,
-                            response={"result": result}
-                        )]
-                    ))
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": function_name,
+                        "content": json.dumps(result)
+                    })
+
                 continue
 
-            text_parts = [p.text for p in model_content.parts if p.text and not p.thought]
-            final_text = "".join(text_parts)
+            final_text = message.content or ""
+
             log_event("final_response", {"text": final_text})
             return final_text
+        
+        return "Error: Max iterations reached without a final answer."
         
 
 if __name__ == "__main__":
