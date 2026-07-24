@@ -2,8 +2,6 @@ import os
 import subprocess
 import sys
 
-from google.genai import types
-
 
 def run_python_file(working_directory, file_path, args=None):
     try:
