@@ -9,7 +9,7 @@ Warning: Although there are path-traversal protection and subprocess timeouts in
 ### 1. Prerequisites
 
 - Python 3.10+
-- An API key from [Google AI Studio](aistudio.google.com) (For now, only Gemini is supported.)
+- An API key from [OpenRouter](https://openrouter.ai/)
 - Optional: [uv](https://docs.astral.sh/uv/) package manager, install with:
   - Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
   - Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
@@ -68,7 +68,8 @@ python main.py
 Upon a user request, the agent can decide either to generate a response or call for function execution. Each function execution's result is returned to the agent and it can decide again which action to take, and so on in a loop. Once it decides to respond with a text, the user can prompt it again.
 
 ## 🛠️ Configuration
-The agent's behavior can be toggled in `config.py`:
+The agent and its behavior can be set in `config.py`:
+- `MODEL_ID` - Name of the model, prefixed with the provider, for example `google/gemini-2.5-flash`
 - `MAX_CHARS` - Maximum number of characters that can be read from a file in a single read function call.
 - `WORKING_DIR` - Name of your working directory. Strict path verification ensures that the agent cannot operate outside of this directory.
 - `MAX_ITERS` - Maximum number of function call iterations in a single response.
