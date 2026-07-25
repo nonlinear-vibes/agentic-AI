@@ -6,10 +6,7 @@ from datetime import datetime
 MAX_CHARS = 10000
 WORKING_DIR = "./workspace/project" # rename project to your project folder
 MAX_ITERS = 20
-VERBOSE = False
-THINKING = True
-KEEP_THOUGHTS = True
-THINKING_TOKEN_LIMIT = 512
+VERBOSE = True
 
 # --- Model Configuration ---
 MODEL_ID = "google/gemini-2.5-flash"

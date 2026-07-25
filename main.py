@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from call_function import available_functions, call_function
-from config import MAX_ITERS, VERBOSE, THINKING, THINKING_TOKEN_LIMIT, KEEP_THOUGHTS, MODEL_ID, log_event
+from config import MAX_ITERS, VERBOSE, MODEL_ID, log_event
 from prompts import SYSTEM_PROMPT
 
 
@@ -29,7 +29,7 @@ def main():
             break
 
         messages.append({"role": "user", "content": user_input})
-        log_event("user_input", {"text": user_input})
+        log_event("User input", user_input)
         print('')
 
         try:
@@ -47,22 +47,45 @@ def generate_response(client, messages):
                 model=MODEL_ID,
                 messages=messages,
                 tools=available_functions,
+                extra_body={
+                    "reasoning": {
+                        "effort": "low",
+                        "summary": "auto"
+                    }
+                }
             )
 
             message = response.choices[0].message
-            messages.append(message.model_dump(exclude_none=True))
+            assistant_msg = {
+                "role": "assistant",
+                "content": message.content
+            }
+
+            if message.reasoning:
+                assistant_msg["reasoning"] = message.reasoning
+                log_event("AI reasoning", message.reasoning)
 
             if message.tool_calls:
                 for tool_call in message.tool_calls:
                     function_name = tool_call.function.name
                     function_args = json.loads(tool_call.function.arguments)
-                    log_event("function_call", {"name": function_name, "args": function_args})
+                    assistant_msg["tool_calls"] = [
+                                        {
+                                            "id": tool_call.id,
+                                            "type": tool_call.type,
+                                            "function": {
+                                                "name": function_name,
+                                                "arguments": function_args
+                                            }
+                                        }
+                                    ]
+                    log_event("Function call", {"name": function_name, "args": function_args})
 
                     if VERBOSE:
                         print(f"- Calling function: {function_name}({function_args})")
 
                     result = call_function(function_name, function_args)
-                    log_event("function_result", {"result": result})
+                    log_event("Function result", {"result": result})
                     
                     if VERBOSE:
                         print(f"-> {result}")
@@ -78,7 +101,7 @@ def generate_response(client, messages):
 
             final_text = message.content or ""
 
-            log_event("final_response", {"text": final_text})
+            log_event("AI response", {"text": final_text})
             return final_text
         
         return "Error: Max iterations reached without a final answer."
