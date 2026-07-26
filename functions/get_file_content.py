@@ -5,8 +5,8 @@ from config import MAX_CHARS
 def get_file_content(working_directory, file_path, line_start=1, line_end=None):
     try:
         # guardrail
-        abs_working_dir = os.path.abspath(working_directory)
-        abs_file_path = os.path.normpath(os.path.join(abs_working_dir, file_path))
+        abs_working_dir = os.path.realpath(working_directory)
+        abs_file_path = os.path.realpath(os.path.join(abs_working_dir, file_path))
         if os.path.commonpath([abs_working_dir, abs_file_path]) != abs_working_dir:
             return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
         if not os.path.isfile(abs_file_path):

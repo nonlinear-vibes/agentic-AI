@@ -3,8 +3,8 @@ import os
 def get_files_info(working_directory, directory="."):
     try:
         # guardrail
-        abs_working_dir = os.path.abspath(working_directory)
-        target_dir = os.path.normpath(os.path.join(abs_working_dir, directory))
+        abs_working_dir = os.path.realpath(working_directory)
+        target_dir = os.path.realpath(os.path.join(abs_working_dir, directory))
         if os.path.commonpath([abs_working_dir, target_dir]) != abs_working_dir:
             return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
         if not os.path.isdir(target_dir):
@@ -38,8 +38,7 @@ schema_get_files_info = {
                     "type": "string",
                     "description": "Directory path to list files from, relative to the working directory (default is the working directory itself)"
                 },
-            },
-            "required": ["directory"] 
+            } 
         }
     }
 }

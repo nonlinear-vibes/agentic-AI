@@ -24,7 +24,7 @@ def main():
     while True:
         user_input = input("User input: ")
         
-        if user_input == 'X':
+        if user_input.strip().lower() in ("x", "exit", "quit"):
             print("Exiting.")
             break
 
@@ -34,6 +34,9 @@ def main():
 
         try:
             final_response = generate_response(client, messages)
+            print("----------------------------------------------------------------")
+            print(messages)
+            print("----------------------------------------------------------------")
             print(f"AI response: {final_response}")
             print('')
         except Exception as e:
@@ -61,32 +64,39 @@ def generate_response(client, messages):
                 "content": message.content
             }
 
-            if message.reasoning:
-                assistant_msg["reasoning"] = message.reasoning
-                log_event("AI reasoning", message.reasoning)
+            reasoning = getattr(message, "reasoning", None)
+            if reasoning:
+                assistant_msg["reasoning"] = reasoning
+                log_event("AI reasoning", reasoning)
 
             if message.tool_calls:
+                assistant_msg["tool_calls"] = [
+                    {
+                        "id": tc.id,
+                        "type": tc.type,
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments,
+                        },
+                    }
+                    for tc in message.tool_calls
+                ] # list of dicts
+                messages.append(assistant_msg)
+
                 for tool_call in message.tool_calls:
                     function_name = tool_call.function.name
                     function_args = json.loads(tool_call.function.arguments)
-                    assistant_msg["tool_calls"] = [
-                                        {
-                                            "id": tool_call.id,
-                                            "type": tool_call.type,
-                                            "function": {
-                                                "name": function_name,
-                                                "arguments": function_args
-                                            }
-                                        }
-                                    ]
                     log_event("Function call", {"name": function_name, "args": function_args})
 
                     if VERBOSE:
                         print(f"- Calling function: {function_name}({function_args})")
 
-                    result = call_function(function_name, function_args)
-                    log_event("Function result", {"result": result})
-                    
+                    try:
+                        result = call_function(function_name, function_args)
+                    except Exception as e:
+                        result = {"erroe": str(e)}
+
+                    log_event("Function result", {"result": result})                    
                     if VERBOSE:
                         print(f"-> {result}")
 
@@ -99,8 +109,9 @@ def generate_response(client, messages):
 
                 continue
 
+            messages.append(assistant_msg)
+            
             final_text = message.content or ""
-
             log_event("AI response", {"text": final_text})
             return final_text
         
