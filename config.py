@@ -6,6 +6,7 @@ from datetime import datetime
 MAX_CHARS = 10000
 WORKING_DIR = "./workspace/project" # rename project to your project folder
 MAX_ITERS = 20
+REASONING_EFFORT = "low"
 VERBOSE = True
 
 # --- Model Configuration ---

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 
 from call_function import available_functions, call_function
-from config import MAX_ITERS, VERBOSE, MODEL_ID, log_event
+from config import MAX_ITERS, VERBOSE, MODEL_ID, REASONING_EFFORT, log_event
 from prompts import SYSTEM_PROMPT
 
 
@@ -57,7 +57,7 @@ def generate_response(client: OpenAI, messages: list[dict[str, str]], docker_cli
                 tools=available_functions,
                 extra_body={
                     "reasoning": {
-                        "effort": "low",
+                        "effort": REASONING_EFFORT,
                         "summary": "auto"
                     }
                 }
