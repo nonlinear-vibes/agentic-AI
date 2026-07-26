@@ -1,9 +1,10 @@
 import os
-import subprocess
 import sys
+import subprocess
+from docker import DockerClient
 
 
-def run_python_file(working_directory, file_path, args=None):
+def run_python_file(working_directory: str, file_path: str, args: list[dict[str, str]]=None, docker_client: DockerClient | None=None) -> str:
     try:
         # guardrail
         abs_working_dir = os.path.realpath(working_directory)
@@ -15,19 +16,51 @@ def run_python_file(working_directory, file_path, args=None):
         if not abs_file_path.endswith(".py"):
             return f'Error: "{file_path}" is not a Python file'
 
-        # build the command to run the Python file
-        command = [sys.executable, abs_file_path]
-        if args:
-            command.extend(args)
+        if docker_client:
+            container = docker_client.containers.run(
+                image="python:3.12-slim",
+                command=["python", file_path, *(args or [])],
+                volumes={abs_working_dir: {"bind": "/workspace", "mode": "rw"}},
+                working_dir="/workspace",
+                network_disabled=True,
+                mem_limit="256m",
+                pids_limit=64,
+                user="nobody",
+                tmpfs={"/tmp": ""},
+                read_only=True,
+                detach=True,
+            )
+            try:
+                exit_status = container.wait(timeout=30)["StatusCode"]
+                stdout = container.logs(stdout=True, stderr=False).decode("utf-8", errors="replace")
+                stderr = container.logs(stdout=False, stderr=True).decode("utf-8", errors="replace")
+            except:
+                container.remove(force=True)
+                raise
+            container.remove(force=True)
 
-        # run the command and capture output
-        result = subprocess.run(
-            command,
-            cwd=abs_working_dir,
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
+            output = []
+            if exit_status != 0:
+                output.append(f"Process exited with code {exit_status}")
+            if not stdout and not stderr:
+                output.append("No output produced")
+            if stdout:
+                output.append(f"STDOUT:\n{stdout}")
+            if stderr:
+                output.append(f"STDERR:\n{stderr}")
+            return "\n".join(output)
+        else:
+            command = [sys.executable, abs_file_path]
+            if args:
+                command.extend(args)
+
+            result = subprocess.run(
+                command,
+                cwd=abs_working_dir,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
 
         # process the output
         output = []
@@ -43,6 +76,7 @@ def run_python_file(working_directory, file_path, args=None):
     
     except Exception as e:
         return f"Error: executing Python file: {e}"
+
 
 
 schema_run_python_file = {

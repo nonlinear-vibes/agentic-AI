@@ -1,6 +1,6 @@
 import os
 
-def get_files_info(working_directory, directory="."):
+def get_files_info(working_directory: str, directory: str=".") -> str:
     try:
         # guardrail
         abs_working_dir = os.path.realpath(working_directory)

@@ -1,7 +1,7 @@
 import os
 
 
-def write_file(working_directory, file_path, content):
+def write_file(working_directory: str, file_path: str, content: str) -> str:
     try:
         # guardrail
         abs_working_dir = os.path.realpath(working_directory)

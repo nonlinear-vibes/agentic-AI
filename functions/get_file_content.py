@@ -2,7 +2,7 @@ import os
 from config import MAX_CHARS
 
 
-def get_file_content(working_directory, file_path, line_start=1, line_end=None):
+def get_file_content(working_directory: str, file_path: str, line_start: int=1, line_end: int | None=None) -> str:
     try:
         # guardrail
         abs_working_dir = os.path.realpath(working_directory)

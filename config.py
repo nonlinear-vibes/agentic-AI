@@ -20,7 +20,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 # Unique filename for this specific run
 LOG_FILE = os.path.join(LOG_DIR, f"session_{SESSION_ID}.jsonl")
 
-def log_event(event_type, data):
+def log_event(event_type: str, data: str):
     """Appends a JSON-formatted event to the session-specific log file."""
     entry = {
         "timestamp": datetime.now().isoformat(),

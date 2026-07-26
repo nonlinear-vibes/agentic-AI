@@ -1,7 +1,11 @@
 import os
 import json
-from dotenv import load_dotenv
+import docker
+import shutil
 from openai import OpenAI
+from docker import DockerClient
+from dotenv import load_dotenv
+
 
 from call_function import available_functions, call_function
 from config import MAX_ITERS, VERBOSE, MODEL_ID, log_event
@@ -19,6 +23,10 @@ def main():
         api_key=api_key,
         )
 
+    docker_client, docker_warning = get_docker_client()
+    if docker_warning:
+        print(f"⚠️  {docker_warning} Running without sandboxing for run_python_file.")
+
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     while True:
@@ -33,10 +41,7 @@ def main():
         print('')
 
         try:
-            final_response = generate_response(client, messages)
-            print("----------------------------------------------------------------")
-            print(messages)
-            print("----------------------------------------------------------------")
+            final_response = generate_response(client, messages, docker_client)
             print(f"AI response: {final_response}")
             print('')
         except Exception as e:
@@ -44,7 +49,7 @@ def main():
             break
 
 # agentic loop
-def generate_response(client, messages):
+def generate_response(client: OpenAI, messages: list[dict[str, str]], docker_client: DockerClient) -> str:
         for _ in range(MAX_ITERS):
             response = client.chat.completions.create(
                 model=MODEL_ID,
@@ -92,9 +97,9 @@ def generate_response(client, messages):
                         print(f"- Calling function: {function_name}({function_args})")
 
                     try:
-                        result = call_function(function_name, function_args)
+                        result = call_function(function_name, function_args, docker_client)
                     except Exception as e:
-                        result = {"erroe": str(e)}
+                        result = {"error": str(e)}
 
                     log_event("Function result", {"result": result})                    
                     if VERBOSE:
@@ -116,6 +121,18 @@ def generate_response(client, messages):
             return final_text
         
         return "Error: Max iterations reached without a final answer."
+
+
+
+def get_docker_client() -> tuple[DockerClient | None, str]:
+    if shutil.which("docker") is None:
+        return None, "Docker is not installed."
+    try:
+        client = docker.from_env()
+        client.ping()
+        return client, None
+    except Exception:
+        return None, "Docker is installed but the daemon isn't running (start Docker Desktop / the docker service)."
         
 
 if __name__ == "__main__":

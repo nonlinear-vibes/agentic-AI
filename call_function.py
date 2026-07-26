@@ -1,3 +1,5 @@
+import inspect
+from docker import DockerClient
 from config import WORKING_DIR
 from functions.get_file_content import get_file_content, schema_get_file_content
 from functions.get_files_info import get_files_info, schema_get_files_info
@@ -19,18 +21,18 @@ function_map = {
     "write_file": write_file,
 }
 
-def call_function(function_name, function_args):
+def call_function(function_name: str, function_args: dict[str, str], docker_client: DockerClient | None=None) -> str:
     if function_name not in function_map:
         return {"error": f"Unknown function: {function_name}"}
     
-    args = {}
-    if function_args:
-        args = {k: v for k, v in function_args.items()}
+    func_args = dict(function_args) if function_args else {}
+    func_args["working_directory"] = WORKING_DIR
 
-    args["working_directory"] = WORKING_DIR
+    called_function = function_map[function_name]
+    if "docker_client" in inspect.signature(called_function).parameters:
+        func_args["docker_client"] = docker_client
 
     try:
-        function_result = function_map[function_name](**args)
-        return function_result
+        return called_function(**func_args)
     except Exception as e:
         return {"error": str(e)}
